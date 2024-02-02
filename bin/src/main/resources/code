@@ -1,0 +1,179 @@
+/**
+     * @Note algorithm de solution...(mauvaise version....)
+     * @throws Exception (...)
+     */
+    private void wrong_solution() throws Exception {
+        boolean old_state = true;
+        boolean new_state;
+        int previous_value = 0;
+        int current_value;
+        int next_value;
+        int size = x_axis_values.size();
+
+        for (int index = 0; index < size - 1; index++) { // -1 pour éviter out of bound // s'il n'y a qu'un seul élément alors on entre pas
+            if (index != 0) previous_value = x_axis_values.get(index - 1);
+            current_value = x_axis_values.get(index);
+            next_value = x_axis_values.get(index + 1);
+            new_state = current_value <= next_value;
+
+            if (index == 0 && current_value < next_value) { //pour début de liste
+                solution_map.put(index, ruleOf3(current_value, next_value));
+            } else if (!old_state && new_state) { //si old_state est FALSE et new_state est TRUE alors eau
+                solution_map.put(index, ruleOf3(previous_value, current_value, next_value));
+            } else if (index == x_axis_values.size() - 2 && !new_state) { //pour fin de liste (4,2)
+                solution_map.put(index + 1, ruleOf3(current_value, next_value));
+            }
+            old_state = new_state;
+        }
+    }
+
+    private Integer ruleOf3(Integer...integers) throws Exception { //return le niveau d'élévation (selon MAX_ELEVATION)
+        ArrayList<Integer> integers_asList = new ArrayList<>(Arrays.asList(integers));
+        Collections.sort(integers_asList);
+        if (integers.length == 2) {
+            return integers_asList.get(1); //return le plus grand (pour fin de liste)
+        } else if (integers.length == 3) {
+            return integers_asList.get(1); //return le deuxième plus grand
+        }
+        return null;
+    }
+
+    /**
+         * @Note le bon algorithm
+         * Arrange la solution_map(index, niveau d'elevation de l'eau)
+         * @throws Exception (...)
+         */
+    //    private void solve() throws Exception {
+    //        int current_value;
+    //        int next_value;
+    //        int size = x_axis_values.size();
+    //        ArrayList<Integer> sub_x_values = new ArrayList<>();
+    //
+    //        for (int elem = 0; elem < size - 1; elem++) { //elem = index de la x axis list [0,1,2,3,...n]
+    //            current_value = x_axis_values.get(elem); //current value in x axis list
+    //            next_value = x_axis_values.get(elem +1); //next value in x axis list //à revoir (rajouter condition?)
+    //            if (current_value > next_value) { //elem n'est pas égal à l'avant dernier element //elem != size - 2
+    //                for (int sub_elem = elem + 1; x_axis_values.get(sub_elem) < current_value; sub_elem++) { //ajoute dans la liste sub_x_value les elements x_axis_value a partir de l'index du for() principale jusqu'au moment ou current value est plus petit
+    //                    sub_x_values.add(sub_elem);
+    //                    if (sub_elem == size - 1) {
+    //                        break;
+    //                    }
+    //                }
+    //                for (Integer i : sub_x_values) solution_map.put(i, current_value);
+    //                elem = sub_x_values.get(sub_x_values.size() - 1); //elem recommence à partir l'element ex:7(6) de la liste --> [0,1,2,3,4,5,6]
+    //                sub_x_values.clear();
+    //            }
+    //        }
+    //    }
+
+
+    /**
+         * @Notes marche seulement pour la partie gauche (avant la plus grande elevation)
+         * @param integers
+         * @return
+         * @throws Exception
+         */
+        private boolean ascendantSolver(ArrayList<Integer> integers) throws Exception {
+            int current_value;
+            int next_value;
+            int size = integers.size();
+            ArrayList<Integer> sub_x_values = new ArrayList<>();
+
+            for (int elem = 0; elem < size - 1; elem++) { //elem = index de la x axis list [0,1,2,3,...n]
+                current_value = integers.get(elem); //current value in x axis list
+                next_value = integers.get(elem +1); //next value in x axis list //à revoir (rajouter condition?)
+                if (current_value > next_value) { //elem n'est pas égal à l'avant dernier element //elem != size - 2
+                    for (int sub_elem = elem + 1; integers.get(sub_elem) < current_value; sub_elem++) { //ajoute dans la liste sub_x_value les elements x_axis_value a partir de l'index du for() principale jusqu'au moment ou current value est plus petit
+                        sub_x_values.add(sub_elem);
+                        if (sub_elem == size - 1) return true; //si la haute élévation a été trouvé
+
+                    }
+                    for (Integer i : sub_x_values) solution_map.put(i, elevation_map.get(current_value));
+                    elem = sub_x_values.get(sub_x_values.size() - 1); //elem recommence à partir l'element ex:7(6) de la liste --> [0,1,2,3,4,5,6]
+                    sub_x_values.clear();
+                }
+            }
+            return false;
+        }
+
+        //        if (ascendantSolver(x_axis_values)) {
+        //            ArrayList<Integer> indexes = new ArrayList<>(solution_map.keySet());
+        //            Collections.sort(indexes);
+        //            int index_of_highest_elevation = indexes.get(indexes.size() - 1) + 1; //on prend le derniere index de la liste et on fait +1 pour arriver a l'index du plus grand element de [x_values]
+        //            ArrayList<Integer> right_x_values = new ArrayList<>();
+        //            for (int elem = index_of_highest_elevation; elem < x_axis_values.size(); elem++) right_x_values.add(x_axis_values.get(elem));
+        //            Collections.reverse(right_x_values);
+        //            System.out.println(right_x_values);
+        //
+        //            int current_highest_elevation = max_elevation;
+        //            for (int elem = index_of_highest_elevation + 1; elem < x_axis_values.size(); elem++) {
+        //                System.out.println("index : " + elem + " : " + x_axis_values.get(elem));
+        //            }
+        //
+        //
+        //        } else {
+        //            System.out.println("non");
+        //        }
+
+        /**
+             * @Note marche seulement pour la partie gauche (avant la plus grande elevation)
+             * @param x_axis_list (...)
+             * @return (...)
+             * @throws Exception (...)
+             */
+            private LinkedHashMap<Integer, Integer> ascendantSolver(ArrayList<Integer> x_axis_list) throws Exception {
+                int current_value;
+                int next_value;
+                int size = x_axis_list.size();
+                LinkedHashMap<Integer, Integer> solved_map = new LinkedHashMap<>();
+                ArrayList<Integer> sub_x_values = new ArrayList<>();
+
+                for (int elem = 0; elem < size - 1; elem++) { //elem = index de la x axis list [0,1,2,3,...n]
+                    current_value = x_axis_list.get(elem); //current value in x axis list
+                    next_value = x_axis_list.get(elem + 1); //next value in x axis list //à revoir (rajouter condition?)
+                    if (current_value > next_value) { //elem n'est pas égal à l'avant dernier element //elem != size - 2
+                        for (int sub_elem = elem + 1; x_axis_list.get(sub_elem) < current_value; sub_elem++) { //ajoute dans la liste sub_x_value les elements x_axis_value a partir de l'index du for() principale jusqu'au moment ou current value est plus petit
+                            sub_x_values.add(sub_elem);
+                            if (sub_elem == size - 1) return solved_map; //si la haute élévation a été trouvé
+                        }
+                        for (Integer index : sub_x_values) solved_map.put(index, elevation_map.get(current_value));
+                        elem = sub_x_values.get(sub_x_values.size() - 1); //elem recommence à partir l'element ex:7(6) de la liste --> [0,1,2,3,4,5,6]
+                        sub_x_values.clear();
+                    }
+                }
+                return solved_map;
+            }
+
+            /**
+             * @Note from right to left (même méthode, mais cette fois-ci on va de 18 -> à la plus grande elevation)
+             * @param reversed_x_axis_list ()
+             * @param index_of_max_elevation ()
+             * @return ()
+             * @throws Exception ()
+             */
+            private LinkedHashMap<Integer, Integer> reverseAscendantSolver(ArrayList<Integer> reversed_x_axis_list, int index_of_max_elevation) throws Exception {
+                int current_value;
+                int next_value;
+                int size = reversed_x_axis_list.size();
+                LinkedHashMap<Integer, Integer> solved_map = new LinkedHashMap<>();
+                ArrayList<Integer> sub_x_values = new ArrayList<>();
+
+                for (int elem = x_axis_values.size() - 1; elem > index_of_max_elevation; elem--) {
+                    current_value = reversed_x_axis_list.get(elem);
+                    next_value = reversed_x_axis_list.get(elem - 1);
+                    if (current_value > next_value) {
+                        for (int sub_elem = elem - 1; reversed_x_axis_list.get(sub_elem) < current_value; sub_elem--) {
+                            sub_x_values.add(sub_elem);
+                            if (sub_elem == size - 1) return solved_map;
+                        }
+                        for (Integer i : sub_x_values) solved_map.put(i, elevation_map.get(current_value));
+                        elem = sub_x_values.get(sub_x_values.size() - 1);
+                        sub_x_values.clear();
+                    }
+                }
+                return solved_map;
+            }
+
+            //        if (ascendantSolver()) {
+            //            reverseAscendantSolver();
+            //        }
